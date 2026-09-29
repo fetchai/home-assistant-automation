@@ -1,0 +1,12 @@
+agent_home/venv
+agent_home/*.db
+agent_home/__pycache__
+**/__pycache__
+panel/node_modules
+
+# Test-only; never COPYed, listed so it stays that way
+tests
+conftest.py
+pytest.ini
+requirements-dev.txt
+.pytest_cache

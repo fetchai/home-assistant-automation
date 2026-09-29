@@ -1,0 +1,49 @@
+name: "Fetch.ai Automation Agent"
+description: "Natural-language Home Assistant automation agent — controls your devices and proposes, creates and edits automations for you"
+version: "2.28.2"
+slug: "fetchai-automation-agent"
+url: "https://github.com/fetchai/home-assistant-automation"
+arch:
+  - aarch64
+  - amd64
+startup: services
+boot: auto
+init: false
+homeassistant_api: true
+hassio_api: true
+ingress: true
+ingress_port: 8098
+# Polled by the Supervisor every 120 s when the add-on's Watchdog toggle is on:
+# 10 s timeout, restart on the second miss. /health is served on the agent's
+# event loop, so it fails exactly when the loop is stalled (tasks/heartbeat.py).
+# Asked of proxy.py (8098), which forwards it: the agent listens on 127.0.0.1
+# only since 2.24.2, so the Supervisor cannot reach 8099 (core/uagent.py).
+watchdog: "http://[HOST]:[PORT:8098]/health"
+panel_title: "Fetch.ai Automation Agent"
+panel_icon: mdi:robot-outline
+map:
+  - data:rw
+options:
+  asi1_api_key: ""
+  asi1_model: ""
+  asi1_model_strong: ""
+  asi1_strong_daily_cap: 20
+  analyst_enabled: true
+  digest_day: saturday
+  agent_name: "HAAutomationAgent"
+  agent_display_name: "HA Automation Agent"
+  agentverse_api_key: ""
+  notify_service: ""
+  record_max_mb: 256
+schema:
+  asi1_api_key: str
+  asi1_model: str?
+  asi1_model_strong: str?
+  asi1_strong_daily_cap: int(0,)?
+  analyst_enabled: bool?
+  digest_day: list(monday|tuesday|wednesday|thursday|friday|saturday|sunday)?
+  agent_name: str?
+  agent_display_name: str?
+  agentverse_api_key: str?
+  notify_service: str?
+  record_max_mb: int(0,)?

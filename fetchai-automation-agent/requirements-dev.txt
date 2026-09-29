@@ -1,0 +1,13 @@
+# Unit-test dependencies ONLY — deliberately does NOT include requirements.txt.
+# tests/conftest.py stubs the heavy runtime imports (langchain, uagents, pydantic,
+# requests) so the suite runs on the standard library plus pytest alone. Where the
+# real dependencies ARE installed, conftest installs no stubs and the same tests
+# run against them unchanged. See tests/conftest.py.
+#
+# The Dockerfile copies requirements.txt by name, so this file never reaches the image.
+pytest>=8.4
+
+# Not stubbed: core/agent_runtime.py imports yaml for real (it renders the
+# approval diff), and a fake would test nothing. It is already a runtime
+# dependency in requirements.txt — repeated here so a bare venv can run the suite.
+pyyaml>=6.0

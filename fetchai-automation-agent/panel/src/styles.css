@@ -1,0 +1,203 @@
+/* Design tokens, reset, and the markdown rules for agent replies.
+   Everything else is scoped to its component. */
+
+:root {
+  --bg: #ffffff;
+  --surface: #f6f7f9;
+  --surface-strong: #eceef1;
+  --border: #e4e6ea;
+  --text: #1c1e21;
+  --text-muted: #6b7280;
+  --accent: #2f6fed;
+  --accent-hover: #2560d8;
+  --accent-fg: #ffffff;
+  --success: #2e7d51;
+  --danger: #c0392b;
+  --added: #2e7d51;
+  --removed: #c0392b;
+  --added-bg: rgba(46, 125, 81, 0.12);
+  --removed-bg: rgba(192, 57, 43, 0.12);
+  /* A caution the user has to read before acting — the "not tested" notice on
+     a suggestion no replay stands behind. Not --danger: nothing is wrong yet. */
+  --warning: #8a5a00;
+  --warning-bg: rgba(212, 150, 20, 0.14);
+  /* An explorer idea's chart (SuggestionChart.vue). Three categorical slots,
+     one per charted entity, in this fixed order — validated as a set against
+     --bg in both modes (all pairs, colour-blind separation included). Slot 1
+     and the heatmap are the panel's own --accent, the blue the Record tab's
+     hour bars use, so a chart reads as part of the panel; slot 2's orange is
+     the one hue that stays apart from that blue under colour blindness. Slot 3
+     is under 3:1 on white, so every lane carries its entity's name as text.
+     --chart-heat is the heatmap's one hue, stepped by opacity. --chart-gap
+     hatches "no data": unknown / unavailable, never drawn as a state. */
+  --chart-1: var(--accent);
+  --chart-2: #eb6834;
+  --chart-3: #1baf7a;
+  --chart-heat: var(--accent);
+  --chart-rest: #9aa1ab;
+  --chart-gap: #9aa1ab;
+  --chart-grid: #e4e6ea;
+
+  --radius: 10px;
+  --radius-sm: 6px;
+  --radius-lg: 16px;
+
+  --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica,
+    Arial, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas,
+    "Liberation Mono", monospace;
+}
+
+/* HA users commonly run a dark theme; the ingress iframe would otherwise
+   glare white next to it. */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #16181c;
+    --surface: #1f2227;
+    --surface-strong: #272b31;
+    --border: #2c3036;
+    --text: #e6e8eb;
+    --text-muted: #9aa1ab;
+    --accent: #5b8def;
+    --accent-hover: #6f9bf2;
+    --accent-fg: #0f1114;
+    --success: #58c98d;
+    --danger: #ef7a6d;
+    --added: #58c98d;
+    --removed: #ef7a6d;
+    --added-bg: rgba(88, 201, 141, 0.14);
+    --removed-bg: rgba(239, 122, 109, 0.14);
+    --warning: #e3b341;
+    --warning-bg: rgba(227, 179, 65, 0.14);
+    --chart-2: #d95926;
+    --chart-3: #199e70;
+    --chart-rest: #6b7280;
+    --chart-gap: #6b7280;
+    --chart-grid: #2c3036;
+  }
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font);
+  font-size: 15px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+#app {
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+}
+
+button {
+  font: inherit;
+  cursor: pointer;
+}
+
+button:disabled {
+  cursor: not-allowed;
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* Agent replies are rendered from markdown and regularly contain lists and
+   fenced YAML, so they get real document styles rather than bubble styles. */
+.markdown > *:first-child {
+  margin-top: 0;
+}
+
+.markdown > *:last-child {
+  margin-bottom: 0;
+}
+
+.markdown p,
+.markdown ul,
+.markdown ol,
+.markdown pre {
+  margin: 0 0 0.75em;
+}
+
+.markdown ul,
+.markdown ol {
+  padding-left: 1.35em;
+}
+
+.markdown li {
+  margin-bottom: 0.2em;
+}
+
+.markdown h1,
+.markdown h2,
+.markdown h3,
+.markdown h4 {
+  margin: 1.1em 0 0.5em;
+  font-size: 1em;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.markdown code {
+  font-family: var(--font-mono);
+  font-size: 0.87em;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 0.1em 0.35em;
+}
+
+.markdown pre {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 12px 14px;
+  overflow-x: auto;
+}
+
+.markdown pre code {
+  background: none;
+  border: 0;
+  padding: 0;
+  font-size: 0.85em;
+  line-height: 1.55;
+}
+
+.markdown a {
+  color: var(--accent);
+}
+
+.markdown table {
+  border-collapse: collapse;
+  margin-bottom: 0.75em;
+}
+
+.markdown th,
+.markdown td {
+  border: 1px solid var(--border);
+  padding: 4px 10px;
+  text-align: left;
+}
+
+.markdown blockquote {
+  margin: 0 0 0.75em;
+  padding-left: 12px;
+  border-left: 2px solid var(--border);
+  color: var(--text-muted);
+}

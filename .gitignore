@@ -1,0 +1,20 @@
+**/node_modules/
+**/venv/
+**/__pycache__/
+**/*.py[cod]
+.env
+.DS_Store
+*.db
+*.sqlite3
+docs/
+graphify-out/
+
+# Claude Code — local assistant config, not part of the add-on
+.claude/
+CLAUDE.md
+
+# Tests
+.pytest_cache/
+.coverage
+htmlcov/
+.planted.json

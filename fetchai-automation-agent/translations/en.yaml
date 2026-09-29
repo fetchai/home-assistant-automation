@@ -1,0 +1,67 @@
+configuration:
+  asi1_api_key:
+    name: ASI-1 API key
+    description: >-
+      Key for the ASI-1 language model the agent thinks with (from asi1.ai). Required. Everything
+      the model reads is sent to ASI-1 — see "What leaves your home" in the add-on's documentation.
+  asi1_model:
+    name: ASI-1 model
+    description: >-
+      The model for chat: asi1-mini, asi1 or asi1-ultra. Empty means asi1-mini.
+  asi1_model_strong:
+    name: ASI-1 model for the daily analyst
+    description: >-
+      A stronger model for the daily analyst run. Empty means the chat model is used for that too.
+  asi1_strong_daily_cap:
+    name: Daily limit on the stronger model
+    description: >-
+      How many calls to the stronger model the agent may make in one day (default 20). Past it the
+      rest are refused until tomorrow — a cost cap. 0 allows none. Counts only when a separate
+      stronger model is set.
+  analyst_enabled:
+    name: Daily analyst
+    description: >-
+      Once a day, after 07:00, the agent searches what it has recorded about the devices you chose
+      to watch, looks for habits an automation could take over, and keeps its ideas for the
+      weekly digest (see "Digest day"), each with a chart drawn from your record. Nobody is in that
+      conversation, and the answers to its searches — individual state changes with their times,
+      not only summaries — are sent to ASI-1. One search returns at most 500 rows and 32 KB; a run
+      makes at most 20 searches and timelines together. Each idea's card lists every answer the
+      agent received in that run and the start of what each returned. Your last 20 answers to its
+      ideas, with any reason you typed, are sent with the next run so it stops raising what you
+      turned down. The history it reads is that of watched devices only. Turn this off and
+      nothing is sent unless you are chatting with the agent.
+  digest_day:
+    name: Digest day
+    description: >-
+      The day the analyst's ideas are put to you (default saturday): once a week, after 09:00, up
+      to three of them appear in the panel to answer, and a short message listing them waits for
+      you in ASI1 chat. If an earlier week's ideas are still unanswered, only enough new ones are
+      added to make three. An idea not put to you within 14 days is dropped; the analyst may find
+      it again. If the add-on was off that morning, the digest comes the next morning instead.
+      Energy-saving suggestions from the agent's own measurements are not affected: those still
+      come one a day.
+  agent_name:
+    name: Agent name
+    description: >-
+      Internal identifier the agent registers under (default HAAutomationAgent).
+  agent_display_name:
+    name: Agent display name
+    description: >-
+      A display name for the agent (default HA Automation Agent). Not used by the agent at present.
+  agentverse_api_key:
+    name: Agentverse API key
+    description: >-
+      Agentverse mailbox key (from agentverse.ai). Set it to talk to the agent from ASI1 or
+      Agentverse chat as well as from the panel; only paired identities are answered.
+  notify_service:
+    name: Notification service
+    description: >-
+      Where urgent messages from the agent go, e.g. notify.mobile_app_your_phone. Empty means a
+      Home Assistant persistent notification.
+  record_max_mb:
+    name: Record size limit (MB)
+    description: >-
+      Largest the agent's record of watched devices may grow on disk (default 256). Near the limit,
+      the oldest changes are folded into per-device summaries early. 0 means no limit. The record
+      itself never leaves your home.
