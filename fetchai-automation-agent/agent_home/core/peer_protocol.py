@@ -39,7 +39,7 @@ from tools.tool_homeassistant import automations as automations_mod
 from tools.tool_homeassistant.actions import is_sensitive_service
 
 PROTOCOL_NAME = "Fetchai-HomePeer"
-PROTOCOL_VERSION = "0.2.0"
+PROTOCOL_VERSION = "0.2.1"
 
 #: The questions a `read` agent may ask.
 QUERY_KINDS = ("entities", "state", "profile")

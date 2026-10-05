@@ -1,6 +1,6 @@
 name: "Fetch.ai Automation Agent"
 description: "Natural-language Home Assistant automation agent — controls your devices and proposes, creates and edits automations for you"
-version: "2.28.3"
+version: "2.28.4"
 slug: "fetchai-automation-agent"
 url: "https://github.com/fetchai/home-assistant-automation"
 arch:
