@@ -220,7 +220,7 @@ logger = logging.getLogger(__name__)
 # enough that two keys will not collide, short enough to read in a URL, and a
 # pure function of the key so the identity survives a restart, a re-scan and a
 # reinstall without being stored anywhere.
-ID_PREFIX = "ceelabs_"
+ID_PREFIX = "fetchai_"
 ID_DIGEST_CHARS = 16
 
 # The trigger ids the action branches on. Named rather than positional because
@@ -628,7 +628,7 @@ def _description(label: str, evidence: dict) -> str:
     between = f" between {night_window}" if night_window else ""
     seen = f" on {nights} of the last {examined} nights" if nights and examined else ""
     return (
-        f"Written by the CEELABS home agent, and approved by you. {label} was measured{drew}"
+        f"Written by the Fetch home agent, and approved by you. {label} was measured{drew}"
         f" continuously{between}{seen} without being used, so it is switched off at the "
         f"socket overnight and switched back on in the morning. Delete this automation to stop it."
     )
@@ -661,7 +661,7 @@ def _schedule_description(label: str, evidence: dict) -> str:
     seen = (f" on {occurrences} of the last {examined} occurrences"
             if occurrences and examined else "")
     return (
-        f"Written by the CEELABS home agent, and approved by you. {label} was measured{drew}"
+        f"Written by the Fetch home agent, and approved by you. {label} was measured{drew}"
         f" continuously{across}{seen} without being used, so it is switched off at the "
         f"socket for those hours and switched back on at the end of them. Delete this "
         f"automation to stop it."

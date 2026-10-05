@@ -116,7 +116,7 @@ async def process_startup(ctx: Context):
                     agentverse_api_key=settings.AGENTVERSE_API_KEY,
                     agent_seed_phrase=settings.CLIENTS[settings.IDX]["SEED"],
                 ),
-                description="CEELABS automation agent for Home Assistant — creates and manages HA automations from natural language.",
+                description="Fetchai automation agent for Home Assistant — creates and manages HA automations from natural language.",
             )
             ctx.logger.info("Agentverse mailbox registration successful")
         except Exception as e:

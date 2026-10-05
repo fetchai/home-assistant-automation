@@ -26,9 +26,9 @@
 ## [2.28.0] - 2026-09-29
 
 **Feat: any agent can connect over plain chat — no protocol of ours to implement — and the
-`CEELABS-HomePeer` protocol no longer binds an implementer to our docstrings (0.2.0).**
+`Fetchai-HomePeer` protocol no longer binds an implementer to our docstrings (0.2.0).**
 
-- **Why.** Phases 1–3 let another agent in only over `CEELABS-HomePeer`, which no other agent
+- **Why.** Phases 1–3 let another agent in only over `Fetchai-HomePeer`, which no other agent
   implements; the goal is any agent. Chat is what every Agentverse agent speaks.
 - **A chat message from an unknown sender is a request** (`handlers/chat_handlers.py`): recorded with
   `via="chat"` and its first message as the purpose (shown in the panel only), announced once with the
@@ -170,7 +170,7 @@ in the panel (agent-to-agent, phase 1).**
   pairing code from an address known as an agent.
 - **Identity.** uagents verifies the signature of every envelope from an `agent1…` address
   (`uagents/mailbox.py`); it does not verify `user1…` senders, so those are refused.
-- **Its own protocol, answered by code.** `core/peer_protocol.py`: `CEELABS-HomePeer 0.1.0`, published
+- **Its own protocol, answered by code.** `core/peer_protocol.py`: `Fetchai-HomePeer 0.1.0`, published
   with its manifest. `ConnectRequest → ConnectStatus`, `Query → QueryResult`. Nothing an agent sends
   reaches a prompt — the handlers (`handlers/peer_handlers.py`) decide from the verified address and
   the store.

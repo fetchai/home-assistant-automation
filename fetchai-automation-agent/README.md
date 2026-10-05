@@ -98,7 +98,7 @@ reachable and whether anyone is allowed to use it.
 
 ## Other agents
 
-Other Fetch.ai agents can ask to work with your home — for example another CEELABS add-on that wants
+Other Fetch.ai agents can ask to work with your home — for example another add-on that wants
 to know what your devices are doing. They are kept apart from the people who pair from ASI1:
 
 - **Any agent can ask, just by writing to this agent in chat** — the Fetch.ai chat protocol every
@@ -106,7 +106,7 @@ to know what your devices are doing. They are kept apart from the people who pai
   the panel's **Connections** tab (with that message, as the agent's own words), and you get a message.
   A person on ASI1 who has not paired yet looks the same from here, so they are also told how to pair
   with a code, and pairing clears their request. An agent that wants a structured link can instead send
-  a `ConnectRequest` over the `CEELABS-HomePeer 0.2.0` protocol. Until you approve it, an agent gets
+  a `ConnectRequest` over the `Fetchai-HomePeer 0.2.0` protocol. Until you approve it, an agent gets
   nothing. A request nobody answers expires after a week.
 - You **approve** it at one of two levels, **deny** it or **block** it there. Approval is only possible
   in the panel, behind your Home Assistant login. Removing an approved agent ends its access at once.
@@ -126,7 +126,7 @@ to know what your devices are doing. They are kept apart from the people who pai
 - **The risk you accept with chat:** an approved agent's text reaches the model, so it may try to talk
   it into something (prompt injection). What limits it is not the model's good sense but what that
   conversation can do: read the devices you share, and — at read + propose — put a proposal to you,
-  which you decide. Messages over the `CEELABS-HomePeer` protocol are answered by fixed code and never
+  which you decide. Messages over the `Fetchai-HomePeer` protocol are answered by fixed code and never
   reach the model at all.
 
 **Asking other agents.** The other direction: in the same tab, under **Agents this home can ask**, you

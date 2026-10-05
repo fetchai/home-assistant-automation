@@ -113,7 +113,7 @@ class tool_ha_get_entity(BaseTool):
     name: str = "Get Home Assistant entity details"
     description: str = (
         "Get the state, attributes, last_changed and last_updated timestamps for a single "
-        "Home Assistant entity. Pass entity_id, e.g. 'sensor.ceelabs_grid_power'. ALWAYS call "
+        "Home Assistant entity. Pass entity_id, e.g. 'sensor.fetchai_grid_power'. ALWAYS call "
         "'List Home Assistant entities' first if you don't know the exact entity_id. Attributes "
         "that would disclose a credential, a network address or the home's coordinates are "
         "withheld and marked as such — do not ask the user to supply them instead."

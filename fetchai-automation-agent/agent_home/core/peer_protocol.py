@@ -38,7 +38,7 @@ from core import auditor
 from tools.tool_homeassistant import automations as automations_mod
 from tools.tool_homeassistant.actions import is_sensitive_service
 
-PROTOCOL_NAME = "CEELABS-HomePeer"
+PROTOCOL_NAME = "Fetchai-HomePeer"
 PROTOCOL_VERSION = "0.2.0"
 
 #: The questions a `read` agent may ask.

@@ -344,7 +344,7 @@ def test_the_protocol_publishes_a_manifest_with_both_exchanges():
 
     manifest = peer_proto.manifest()
 
-    assert manifest["metadata"]["name"] == "CEELABS-HomePeer"
+    assert manifest["metadata"]["name"] == "Fetchai-HomePeer"
     assert manifest["metadata"]["version"] == "0.2.0"
     names = {m["schema"]["title"] for m in manifest["models"]}
     assert {"ConnectRequest", "ConnectStatus", "Query", "QueryResult"} <= names
