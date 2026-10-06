@@ -15,7 +15,7 @@ from core import peers
 from core import protocols
 from core import watchlist
 from core.peer_protocol import (
-    ConnectRequest, ConnectStatus, Query, QueryResult, answer, MAX_PROFILE_DAYS,
+    ConnectRequest, ConnectStatus, Disconnect, Query, QueryResult, answer, MAX_PROFILE_DAYS,
 )
 from handlers import peer_handlers
 from rest import rest_peers
@@ -131,6 +131,41 @@ class TestTheStore:
         assert peers.level_of(AGENT) is None
         assert peers.request(AGENT, now=T0) == peers.PENDING
 
+    @pytest.mark.parametrize("approve", [True, False])
+    def test_an_agent_can_end_its_own_access(self, approve):
+        peers.request(AGENT, now=T0)
+        if approve:
+            peers.decide(AGENT, "approve", "propose")
+
+        assert peers.leave(AGENT) == "disconnected"
+        assert not peers.is_known(AGENT)
+        assert peers.level_of(AGENT) is None
+
+    @pytest.mark.parametrize("decision", ["deny", "block"])
+    def test_but_cannot_wipe_a_household_decision(self, decision):
+        peers.request(AGENT, now=T0)
+        peers.decide(AGENT, decision)
+
+        assert peers.leave(AGENT) == peers.state_of(AGENT)
+        assert peers.state_of(AGENT) in (peers.DENIED, peers.BLOCKED)
+
+    def test_leaving_keeps_the_households_own_entry(self):
+        peers.add_askable(AGENT, "Energy Agent", "tariffs")
+        peers.request(AGENT, now=T0)
+        peers.decide(AGENT, "approve", "read")
+
+        assert peers.leave(AGENT) == "disconnected"
+
+        assert peers.level_of(AGENT) is None
+        assert peers.state_of(AGENT) is None
+        assert peers.may_be_asked(AGENT)
+
+    def test_leaving_unknown_is_already_done_and_strangers_are_refused(self):
+        assert peers.leave(AGENT) == "disconnected"
+        assert peers.leave(USER) == "refused"
+        assert peers.leave(AGENT, is_person=True) == "refused"
+        assert not peers.is_known(AGENT)
+
     def test_a_corrupt_store_trusts_nobody(self, tmp_path):
         peers.request(AGENT, now=T0)
         peers.decide(AGENT, "approve", "read")
@@ -227,8 +262,49 @@ class TestTheHandlers:
 
         _run(peer_handlers.handle_connect(ctx, AGENT, ConnectRequest()))
         _run(peer_handlers.handle_query(ctx, AGENT, Query(kind="entities")))
+        _run(peer_handlers.handle_disconnect(ctx, AGENT, Disconnect()))
 
         assert ctx.sent == []
+        assert peers.state_of(AGENT) == peers.BLOCKED
+
+    def test_an_approved_agent_disconnects(self, isolated, monkeypatch):
+        peers.request(AGENT, "Energy Agent", "tariffs", now=T0)
+        peers.decide(AGENT, "approve", "propose")
+        withdrawn = []
+        monkeypatch.setattr(rest_peers, "withdraw_open", lambda a, why: withdrawn.append(a))
+        isolated.clear()
+        ctx = _Ctx()
+
+        _run(peer_handlers.handle_disconnect(ctx, AGENT, Disconnect()))
+
+        assert ctx.sent[0][1].state == "disconnected"
+        assert withdrawn == [AGENT]
+        assert not peers.is_known(AGENT)
+        # Announced from the address alone, like a request.
+        assert [kind for kind, _ in isolated] == ["peer_left"]
+        body = isolated[0][1]["body"]
+        assert "Energy Agent" not in body and "tariffs" not in body
+        assert AGENT[:14] in body
+
+    def test_a_pending_agent_withdraws_quietly(self, isolated):
+        peers.request(AGENT, now=T0)
+        isolated.clear()
+        ctx = _Ctx()
+
+        _run(peer_handlers.handle_disconnect(ctx, AGENT, Disconnect()))
+
+        assert ctx.sent[0][1].state == "disconnected"
+        assert isolated == []
+
+    def test_a_denied_agent_stays_denied(self):
+        peers.request(AGENT, now=T0)
+        peers.decide(AGENT, "deny")
+        ctx = _Ctx()
+
+        _run(peer_handlers.handle_disconnect(ctx, AGENT, Disconnect()))
+
+        assert ctx.sent[0][1].state == peers.DENIED
+        assert peers.state_of(AGENT) == peers.DENIED
 
     def test_a_paired_person_cannot_connect_as_an_agent(self, monkeypatch):
         monkeypatch.setattr(pairing, "is_paired", lambda a: a == AGENT)
@@ -344,10 +420,22 @@ def test_the_protocol_publishes_a_manifest_with_both_exchanges():
 
     manifest = peer_proto.manifest()
 
-    assert manifest["metadata"]["name"] == "Fetchai-HomePeer"
-    assert manifest["metadata"]["version"] == "0.2.0"
+    assert manifest["metadata"]["name"] == "HomePeer"
+    assert manifest["metadata"]["version"] == "0.3.0"
     names = {m["schema"]["title"] for m in manifest["models"]}
-    assert {"ConnectRequest", "ConnectStatus", "Query", "QueryResult"} <= names
+    assert {"ConnectRequest", "ConnectStatus", "Query", "QueryResult", "Disconnect"} <= names
+
+
+@pytest.mark.skipif(not REAL_DEPS, reason="needs the real uagents package")
+def test_the_protocol_does_not_have_the_digest_agentverse_named_before():
+    """Agentverse keeps the first name it was given for a digest, and 0.2.0's
+    is stored under the old one — a digest it has never seen is the only way
+    the name reaches it. Any change to the interactions that lands back on this
+    digest brings the old name back."""
+    from core.peer_protocol import peer_proto
+
+    assert peer_proto.digest != (
+        "proto:274f774225efe4e0ae26e675c5f46b979fee7a6bacdd052596438fb59397942a")
 
 
 @pytest.mark.skipif(not REAL_DEPS, reason="needs the real uagents package")
@@ -358,7 +446,7 @@ def test_no_message_carries_a_description_into_its_digest():
     from core import peer_protocol as pp
 
     for model in (pp.ConnectRequest, pp.ConnectStatus, pp.Query, pp.QueryResult,
-                  pp.ActionProposal, pp.ActionStatus):
+                  pp.ActionProposal, pp.ActionStatus, pp.Disconnect):
         assert "description" not in model.schema(), model.__name__
 
 

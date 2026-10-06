@@ -135,7 +135,7 @@
     <p v-if="!pending.length && !approved.length && !declined.length" class="notice">
       No agent has asked yet. Another agent connects by writing to this agent's address above in
       chat (or, for a structured link, sending a <code class="inline">ConnectRequest</code> over the
-      <code class="inline">Fetchai-HomePeer 0.2.0</code> protocol); its request then appears here.
+      <code class="inline">HomePeer 0.3.0</code> protocol); its request then appears here.
     </p>
 
     <div class="heading-row ask-heading">

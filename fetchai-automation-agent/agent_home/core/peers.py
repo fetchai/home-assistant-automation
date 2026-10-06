@@ -254,6 +254,35 @@ def remove(address) -> bool:
     return True
 
 
+def leave(address, *, is_person=False) -> str:
+    """An agent ends its own access (`Disconnect`, protocol 0.3.0). Returns the
+    state to tell it: `disconnected` (its request or approval is forgotten, or
+    it had neither), `denied` or `blocked` (unchanged; the caller stays silent
+    to a blocked one) or `refused` (unsigned, or an address paired as a person).
+
+    It only ever narrows access, so no person is asked. But a denial or a block
+    is the household's decision and is undone only from the panel — otherwise
+    an agent could leave to wipe its record and knock again as news. What the
+    household set up itself, the agent's place on the "this home can ask" list,
+    stays; an entry with nothing else on it goes, as in `remove_askable`. The
+    caller withdraws open proposals first: they go with the row."""
+    if not is_signed_address(address) or is_person:
+        return "refused"
+    peer = _find(address)
+    if peer and peer.get("state") in (DENIED, BLOCKED):
+        return peer["state"]
+    if peer is None or not peer.get("state"):
+        return "disconnected"
+    if "ask" in peer:
+        kept = {key: peer[key] for key in ("address", "ask", "asked") if key in peer}
+        peer.clear()
+        peer.update(kept)
+    else:
+        _load()["peers"] = [p for p in _load()["peers"] if p["address"] != address]
+    _save()
+    return "disconnected"
+
+
 def state_of(address):
     peer = _find(address)
     return peer.get("state") if peer else None

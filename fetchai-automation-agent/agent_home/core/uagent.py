@@ -38,8 +38,10 @@ import os
 
 import uagents.asgi
 from uagents import Agent, Context
+from uagents_core.config import AgentverseConfig
 from uagents_core.utils.registration import (
-    register_chat_agent,
+    AgentverseRegistrationRequest,
+    register_agent,
     RegistrationRequestCredentials,
 )
 from core import settings
@@ -108,15 +110,30 @@ async def process_startup(ctx: Context):
         try:
             ctx.logger.info("Registering agent with Agentverse mailbox...")
             endpoint = f"http://localhost:{settings.CLIENTS[settings.IDX]['PORT']}"
-            register_chat_agent(
-                settings.CLIENTS[settings.IDX]["NAME"],
-                endpoint,
-                active=True,
-                credentials=RegistrationRequestCredentials(
+            # This writes the whole Agentverse profile, and each part left out
+            # is overwritten, not kept. The readme is sent as `readme or ""`, so
+            # without it the page was blanked on every start (2.28.3). And the
+            # protocols listed here are the ones Agentverse lists for the agent
+            # — the Almanac API attestation's fuller list does not win — so this
+            # is register_agent with every included protocol, not
+            # register_chat_agent, which hard-codes the chat digest alone and
+            # left HomePeer off the agent's page (2.29.0).
+            with open(_README_PATH, encoding="utf-8") as f:
+                readme = f.read()
+            register_agent(
+                AgentverseRegistrationRequest(
+                    name=settings.CLIENTS[settings.IDX]["NAME"],
+                    endpoint=endpoint,
+                    protocols=list(agent_1.protocols.keys()),
+                    active=True,
+                    description="Fetch.ai automation agent for Home Assistant — creates and manages HA automations from natural language.",
+                    readme=readme,
+                ),
+                AgentverseConfig(),
+                RegistrationRequestCredentials(
                     agentverse_api_key=settings.AGENTVERSE_API_KEY,
                     agent_seed_phrase=settings.CLIENTS[settings.IDX]["SEED"],
                 ),
-                description="Fetchai automation agent for Home Assistant — creates and manages HA automations from natural language.",
             )
             ctx.logger.info("Agentverse mailbox registration successful")
         except Exception as e:

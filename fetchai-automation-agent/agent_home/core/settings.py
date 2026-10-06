@@ -6,7 +6,7 @@ import os
 from uagents import Context
 from datetime import datetime
 
-VERSION = "2.28.2"
+VERSION = "2.29.0"
 
 ASI1_API_KEY = os.environ.get("ASI1_API_KEY", "")
 ASI1_MODEL   = os.environ.get("ASI1_MODEL", "") or "asi1-mini"

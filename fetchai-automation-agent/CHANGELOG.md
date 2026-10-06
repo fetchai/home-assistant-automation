@@ -1,5 +1,56 @@
 # Changelog
 
+## [2.29.0] - 2026-10-06
+
+**Feat: an agent can end its own access — `HomePeer 0.3.0`, the digest Agentverse names `HomePeer`.**
+
+- **Why a new message.** 2.28.3 showed Agentverse keeps the first metadata it was given for a
+  protocol digest, so `HomePeer` could reach it only under a digest it had never seen, and the digest
+  is the models and interactions alone. Adding an exchange changes it without touching the six
+  existing models: their schema digests are identical to 0.2.0's (compared against the manifest
+  Agentverse stores for `proto:274f7742…`), and uagents dispatches by schema digest, so an agent built
+  against 0.2.0 is still understood. The new digest is `proto:55ca4b6f…`. What an agent built against
+  0.2.0 loses is discovery: a search for the old protocol digest no longer finds this agent.
+- **`Disconnect -> ConnectStatus`.** No fields. `core/peers.leave` forgets a pending request or an
+  approval — the panel's remove, asked for by the agent itself — and answers `disconnected`; an
+  approved agent's open proposals are withdrawn first (`rest_peers.withdraw_open`, public now that
+  `handlers/peer_handlers.handle_disconnect` shares it) and the household gets a `peer_left` message
+  built from the address alone. It only ever narrows access, so no person is asked; and for that
+  reason a denied agent stays denied and a blocked one is not answered — leaving must not wipe a
+  household decision and let the agent knock again as news. The agent's place on the "this home can
+  ask" list is the household's and stays.
+- **HomePeer on the agent's page at all.** Once the startup registration succeeded (2.28.3's address
+  is owned by the account whose key is configured), Agentverse listed the agent with the chat protocol
+  alone: `register_chat_agent` hard-codes the chat digest, and the protocols that call names are the
+  ones Agentverse lists — the Almanac API attestation that follows it, with every protocol, does not
+  win (checked: `/v1/almanac/agents/<address>` answered `[30a801ed…]` after both had succeeded).
+  `core/uagent.py` now calls `register_agent` with `list(agent_1.protocols.keys())` — the list uagents
+  attests — and otherwise exactly what `register_chat_agent` sent (`track_interactions` and `type`
+  keep their defaults). The description it sends spells the company `Fetch.ai`, as the add-on's
+  name does.
+- **Tests.** `tests/test_peers.py`: the store's rules for leaving, the handler (withdrawn, announced
+  without the agent's words, blocked silent, denied unchanged) and, with real uagents, that the digest
+  is not 0.2.0's. `tests/test_agentverse_profile.py` (was `test_uagent_readme.py`): the registration
+  sends the readme and every included protocol.
+
+## [2.28.3] - 2026-10-06
+
+**Fix: the agent-to-agent protocol is plain `HomePeer`, and the Agentverse page keeps its readme.**
+
+- **The protocol's name.** `core/peer_protocol.py` `PROTOCOL_NAME` is `HomePeer`, with no vendor in
+  it; the panel's Connections tab and the README say the same. The name is not in the protocol digest
+  (`compute_digest` blanks the manifest's metadata), so this changes nothing on the wire: an agent
+  built against the old name still matches, and the digest Agentverse lists is the one it always was.
+  It also means Agentverse keeps showing the old name: its manifest store is keyed by digest and keeps
+  the first metadata it was given — the re-published `HomePeer` manifest is accepted and ignored.
+- **The readme.** `register_chat_agent` writes the whole Agentverse profile and sends `readme or ""`.
+  `core/uagent.py` called it without one, so every start that registered successfully replaced the
+  readme `readme_path` had published with an empty one. It now sends `Readme.md`'s text
+  (`tests/test_agentverse_profile.py`).
+- **Why a version for this.** The first rename was committed without a bump, and a local add-on is
+  rebuilt only when its version changes — so the running container never got it and kept publishing
+  the old name.
+
 ## [2.28.2] - 2026-09-29
 
 **Fix: an agent this home asks can ask for access itself.**
@@ -26,9 +77,9 @@
 ## [2.28.0] - 2026-09-29
 
 **Feat: any agent can connect over plain chat — no protocol of ours to implement — and the
-`Fetchai-HomePeer` protocol no longer binds an implementer to our docstrings (0.2.0).**
+`HomePeer` protocol no longer binds an implementer to our docstrings (0.2.0).**
 
-- **Why.** Phases 1–3 let another agent in only over `Fetchai-HomePeer`, which no other agent
+- **Why.** Phases 1–3 let another agent in only over `HomePeer`, which no other agent
   implements; the goal is any agent. Chat is what every Agentverse agent speaks.
 - **A chat message from an unknown sender is a request** (`handlers/chat_handlers.py`): recorded with
   `via="chat"` and its first message as the purpose (shown in the panel only), announced once with the
@@ -170,7 +221,7 @@ in the panel (agent-to-agent, phase 1).**
   pairing code from an address known as an agent.
 - **Identity.** uagents verifies the signature of every envelope from an `agent1…` address
   (`uagents/mailbox.py`); it does not verify `user1…` senders, so those are refused.
-- **Its own protocol, answered by code.** `core/peer_protocol.py`: `Fetchai-HomePeer 0.1.0`, published
+- **Its own protocol, answered by code.** `core/peer_protocol.py`: `HomePeer 0.1.0`, published
   with its manifest. `ConnectRequest → ConnectStatus`, `Query → QueryResult`. Nothing an agent sends
   reaches a prompt — the handlers (`handlers/peer_handlers.py`) decide from the verified address and
   the store.

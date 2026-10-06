@@ -30,8 +30,9 @@ from core import record
 from core import watchlist
 from core.peer_protocol import (
     peer_proto, ConnectRequest, ConnectStatus, Query, QueryResult, ActionProposal, ActionStatus,
-    answer, notice, vet,
+    Disconnect, answer, notice, vet,
 )
+from rest import rest_peers
 from tools.tool_homeassistant import registry
 from tools.tool_homeassistant._client import _ha_get
 
@@ -86,6 +87,33 @@ async def handle_connect(ctx: Context, sender: str, msg: ConnectRequest):
     }.get(state, "")
     await ctx.send(sender, ConnectStatus(state=state, level=peers.level_of(sender) or "",
                                          detail=detail))
+
+
+@peer_proto.on_message(Disconnect, replies={ConnectStatus})
+async def handle_disconnect(ctx: Context, sender: str, msg: Disconnect):
+    """The panel's remove, asked for by the agent itself — which is why only a
+    pending or approved agent can do it (core/peers.leave). An approved one
+    leaving is news to the household, from the address alone."""
+    was = peers.state_of(sender)
+    if was == peers.APPROVED:
+        await asyncio.to_thread(rest_peers.withdraw_open, sender,
+                                "the agent ended its connection")
+    state = peers.leave(sender, is_person=pairing.is_paired(sender))
+    logger.info(f"PEERS: {sender} disconnects ({was} -> {state})")
+    if state == peers.BLOCKED:
+        return
+    if was == peers.APPROVED and state == "disconnected":
+        activity.queue("peer_left", title="An agent ended its connection",
+                       body=(f"An agent ({_short(sender)}) ended its own connection to this home. "
+                             f"It can no longer ask or propose anything; to come back it would "
+                             f"have to ask again, and be approved again."),
+                       payload={"address": sender})
+    detail = {
+        "disconnected": "No access to this home remains. A new ConnectRequest would need approving.",
+        "refused": "This address cannot connect as an agent.",
+        peers.DENIED: "The household denied this agent; only the household can change that.",
+    }.get(state, "")
+    await ctx.send(sender, ConnectStatus(state=state, detail=detail))
 
 
 @peer_proto.on_message(Query, replies={QueryResult, ConnectStatus})

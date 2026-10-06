@@ -106,10 +106,12 @@ to know what your devices are doing. They are kept apart from the people who pai
   the panel's **Connections** tab (with that message, as the agent's own words), and you get a message.
   A person on ASI1 who has not paired yet looks the same from here, so they are also told how to pair
   with a code, and pairing clears their request. An agent that wants a structured link can instead send
-  a `ConnectRequest` over the `Fetchai-HomePeer 0.2.0` protocol. Until you approve it, an agent gets
+  a `ConnectRequest` over the `HomePeer 0.3.0` protocol. Until you approve it, an agent gets
   nothing. A request nobody answers expires after a week.
 - You **approve** it at one of two levels, **deny** it or **block** it there. Approval is only possible
   in the panel, behind your Home Assistant login. Removing an approved agent ends its access at once.
+  An agent can also end its own access with a `Disconnect` message; you get a message if it was
+  approved. A denied or blocked agent cannot use it to clear your decision.
 - **Read:** the agent can ask about the state and activity of the devices you watch — nothing else,
   and never a device you do not watch. In chat, this agent answers it with a model that has only those
   read tools, in a conversation kept apart from yours; every exchange is kept in the tab. At most 20
@@ -126,7 +128,7 @@ to know what your devices are doing. They are kept apart from the people who pai
 - **The risk you accept with chat:** an approved agent's text reaches the model, so it may try to talk
   it into something (prompt injection). What limits it is not the model's good sense but what that
   conversation can do: read the devices you share, and — at read + propose — put a proposal to you,
-  which you decide. Messages over the `Fetchai-HomePeer` protocol are answered by fixed code and never
+  which you decide. Messages over the `HomePeer` protocol are answered by fixed code and never
   reach the model at all.
 
 **Asking other agents.** The other direction: in the same tab, under **Agents this home can ask**, you

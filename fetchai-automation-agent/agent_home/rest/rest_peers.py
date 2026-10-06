@@ -64,8 +64,9 @@ def _open_proposals() -> list:
     return sorted(out, key=lambda p: p["proposed_at"] or 0)
 
 
-def _withdraw_open(address, why) -> int:
-    """Withdraws an agent's open proposals. Returns how many."""
+def withdraw_open(address, why) -> int:
+    """Withdraws an agent's open proposals. Returns how many. Also the path
+    when an agent disconnects itself (handlers/peer_handlers.handle_disconnect)."""
     withdrawn = 0
     for change_id in peers.unreported(address):
         if (activity.change(change_id) or {}).get("decision") == "proposed":
@@ -92,7 +93,7 @@ async def handle_peers_decide(ctx: Context, req: protocols.PeersRequest) -> prot
     if not ok:
         return _response(_ERRORS.get(reason, reason))
     if not peers.may_propose(peers.level_of(req.address)):
-        await asyncio.to_thread(_withdraw_open, req.address,
+        await asyncio.to_thread(withdraw_open, req.address,
                                 "the household no longer lets that agent propose changes")
     if reason != peers.BLOCKED and ctx is not None:
         try:
@@ -107,7 +108,7 @@ async def handle_peers_decide(ctx: Context, req: protocols.PeersRequest) -> prot
 async def handle_peers_remove(ctx: Context, req: protocols.PeersRequest) -> protocols.PeersResponse:
     """Forgets an agent: its access ends now, its open proposals are withdrawn,
     and it may ask again."""
-    await asyncio.to_thread(_withdraw_open, req.address, "the household removed that agent")
+    await asyncio.to_thread(withdraw_open, req.address, "the household removed that agent")
     peers.remove(req.address)
     return _response()
 

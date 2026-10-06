@@ -15,6 +15,7 @@ the other side from the digest alone.
     ActionProposal -> ActionStatus    a propose-level agent's change, put to a
                                       person; later ActionStatus messages say how
                                       it ended (tasks/peer_outcomes.py)
+    Disconnect     -> ConnectStatus   an agent ends its own access (0.3.0)
 
 No message model here has a docstring, on purpose (0.2.0). uagents matches a
 message to its handler by `Model.build_schema_digest` — sha256 of the model's
@@ -38,8 +39,16 @@ from core import auditor
 from tools.tool_homeassistant import automations as automations_mod
 from tools.tool_homeassistant.actions import is_sensitive_service
 
-PROTOCOL_NAME = "Fetchai-HomePeer"
-PROTOCOL_VERSION = "0.2.1"
+# Neither the name nor the version is in the protocol digest —
+# `ProtocolSpecification.compute_digest` blanks the manifest's metadata — and
+# Agentverse stores manifests by digest, keeping the FIRST one's metadata. So
+# renaming alone (2.28.3) was accepted and ignored: "Manifest published
+# successfully: HomePeer", while /v1/almanac/manifests/protocols/<digest> kept
+# answering with the old name (checked 2026-10-06). A name reaches Agentverse
+# only with a new digest — 0.3.0's `Disconnect` is what gave it one. Renaming
+# again means changing the interactions again.
+PROTOCOL_NAME = "HomePeer"
+PROTOCOL_VERSION = "0.3.0"
 
 #: The questions a `read` agent may ask.
 QUERY_KINDS = ("entities", "state", "profile")
@@ -56,8 +65,8 @@ class ConnectRequest(Model):
     level: str = "read"
 
 
-# `state`: pending, approved, denied, refused or full. `level` is set only
-# when approved.
+# `state`: pending, approved, denied, refused, full or disconnected. `level`
+# is set only when approved.
 class ConnectStatus(Model):
     state: str
     level: str = ""
@@ -102,6 +111,15 @@ class ActionStatus(Model):
     state: str
     change_id: int = 0
     detail: str = ""
+
+
+# The sender ends its own access: its request or approval is forgotten and its
+# open proposals are withdrawn. Answered `disconnected`; a denied agent stays
+# denied, and a blocked one hears nothing (core/peers.leave). No fields — the
+# address is the whole of what is needed, and anything it said would be one
+# more piece of an agent's own words to keep away from the model.
+class Disconnect(Model):
+    pass
 
 
 peer_proto = Protocol(name=PROTOCOL_NAME, version=PROTOCOL_VERSION)

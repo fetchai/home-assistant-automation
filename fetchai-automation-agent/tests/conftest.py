@@ -132,6 +132,9 @@ def _install_uagents():
             # The real Agent's own attribute name, so the wiring test that
             # reads it holds against both (core/registration.py).
             self._registration_policy = kwargs.get("registration_policy")
+            # Public on the real Agent too, keyed by protocol digest: what
+            # core.uagent registers with Agentverse at startup.
+            self.protocols = {}
             # readme_path and other real-Agent-only kwargs land in **kwargs and
             # are dropped — a CI run against real uagents found the real Agent
             # exposes no public attribute for it either, so a stub attribute
@@ -204,11 +207,13 @@ def _install_uagents():
 
 
 def _install_uagents_core():
-    """core/uagent.py imports uagents_core.utils.registration unconditionally
-    at module scope, even though register_chat_agent is only ever called from
-    inside process_startup — an event handler this suite never invokes. Stubbed
-    just enough to satisfy the import; register_chat_agent itself still raises
-    if anything ever does call it, same defence-in-depth as the requests stub.
+    """core/uagent.py imports uagents_core.utils.registration and
+    uagents_core.config unconditionally at module scope, even though
+    register_agent is only ever called from inside process_startup — an event
+    handler this suite invokes only with the function replaced
+    (tests/test_agentverse_profile.py). Stubbed just enough to satisfy the
+    import; register_agent itself still raises if anything ever does call it,
+    same defence-in-depth as the requests stub.
 
     uagents_core.contrib.protocols.chat (handlers/chat_handlers.py's dependency)
     is deliberately NOT stubbed here — that module stays out of scope.
@@ -217,19 +222,31 @@ def _install_uagents_core():
     utils = _stub("uagents_core.utils")
     registration = _stub("uagents_core.utils.registration")
 
+    config = _stub("uagents_core.config")
+
     class RegistrationRequestCredentials:
         def __init__(self, **kwargs):
             self.__dict__.update(kwargs)
 
-    def register_chat_agent(*args, **kwargs):
+    class AgentverseRegistrationRequest:
+        def __init__(self, **kwargs):
+            self.__dict__.update(kwargs)
+
+    class AgentverseConfig:
+        pass
+
+    def register_agent(*args, **kwargs):
         raise NetworkAccessInTests(
-            "register_chat_agent talks to Agentverse — must not run in tests"
+            "register_agent talks to Agentverse — must not run in tests"
         )
 
     registration.RegistrationRequestCredentials = RegistrationRequestCredentials
-    registration.register_chat_agent = register_chat_agent
+    registration.AgentverseRegistrationRequest = AgentverseRegistrationRequest
+    registration.register_agent = register_agent
+    config.AgentverseConfig = AgentverseConfig
     utils.registration = registration
     root.utils = utils
+    root.config = config
 
 
 def _install_langchain():
