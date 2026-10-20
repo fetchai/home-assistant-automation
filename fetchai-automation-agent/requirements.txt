@@ -1,4 +1,4 @@
-langchain==1.2.15
+langchain==1.3.9
 langchain-core==1.2.27
 langchain-openai==1.1.12
 uagents==0.25.1
