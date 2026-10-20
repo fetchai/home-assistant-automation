@@ -1,6 +1,6 @@
 langchain==1.2.15
 langchain-core==1.2.27
-langchain-openai==1.1.12
+langchain-openai==1.1.14
 uagents==0.25.1
 uagents-core==0.4.5
 requests==2.33.1
