@@ -252,3 +252,8 @@ to approve it, so an invalid config is corrected by the agent instead of reachin
 - An ASI-1 API key (from [asi1.ai](https://asi1.ai))
 - An Agentverse API key (from [agentverse.ai](https://agentverse.ai)) if you want to chat with the agent
   from outside Home Assistant
+
+## License
+
+Released under the [PolyForm Noncommercial License 1.0.0](https://github.com/fetchai/home-assistant-automation/blob/main/LICENSE.md):
+free for personal and other noncommercial use; commercial use needs a separate license.
