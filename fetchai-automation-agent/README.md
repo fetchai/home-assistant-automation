@@ -257,3 +257,7 @@ to approve it, so an invalid config is corrected by the agent instead of reachin
 
 Released under the [PolyForm Noncommercial License 1.0.0](https://github.com/fetchai/home-assistant-automation/blob/main/LICENSE.md):
 free for personal and other noncommercial use; commercial use needs a separate license.
+
+Bug reports and feature requests are welcome as GitHub issues, but we are not accepting outside pull
+requests at the moment. Please report security issues privately, as described in
+[SECURITY.md](https://github.com/fetchai/home-assistant-automation/blob/main/SECURITY.md).
